@@ -1,37 +1,15 @@
-apiVersion: cluster.x-k8s.io/v1beta1
-kind: Cluster
+# 1. Les Identifiants Cloud (Obligatoire pour l'authentification)
+apiVersion: provisioning.cattle.io/v1
+kind: CloudCredential
 metadata:
-  name: rke2-downstream-harvester
-  namespace: fleet-default # Obligatoire : Turtles écoute dans fleet-default
-  labels:
-    # Ligne magique : Turtles va importer automatiquement le cluster dans l'UI Rancher dès qu'il sera prêt
-    cluster-api.cattle.io/rancher-auto-import: "true"
-spec:
-  clusterNetwork:
-    pods:
-      cidrBlocks: ["10.244.0.0/16"]
-  # Étape A : On lie l'infrastructure à Harvester
-  infrastructureRef:
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: HarvesterCluster
-    name: harvester-infra-target
-  # Étape B : On lie le Control Plane au moteur RKE2
-  controlPlaneRef:
-    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
-    kind: RKE2ControlPlane
-    name: rke2-control-plane-target
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: HarvesterCluster
-metadata:
-  name: harvester-infra-target
+  name: harvester-creds
   namespace: fleet-default
 spec:
-  # C'est ici que tu cibles ton Harvester physique connu par Rancher
-  harvesterClusterRef:
-    name: "c-8nwwt"
+  harvesterCredentialConfig:
+    clusterId: "c-8nwwt" # Ton Harvester
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+# 2. Le Template de Machine Standard Rancher 2.12
+apiVersion: rke-node.cattle.io/v1
 kind: HarvesterMachineTemplate
 metadata:
   name: rke2-sle-micro-template
@@ -39,22 +17,44 @@ metadata:
 spec:
   template:
     spec:
-      vmConfig:
-        cpuCount: 4
-        memorySize: 8Gi
-        imageName: "harvester-public/sle-micro-62" # Ton image d'OS
-        networkName: "harvester-public/management" # Ton réseau par défaut (DHCP externe requis)
-      # Configuration de tes disques pour isoler /var/lib
-      cloudInit:
-        userData: |
-          #cloud-config
-          runcmd:
-            - |
-              # 1. Formater le second disque vdb en XFS
-              mkfs.xfs /dev/vdb
-              # 2. Récupérer son UUID et l'ajouter au fstab
-              UUID=$(blkid -s UUID -o value /dev/vdb)
-              echo "UUID=${UUID} /var/lib xfs defaults,noatime 0 2" >> /etc/fstab
-              # 3. Créer le point de montage et monter le disque
-              mkdir -p /var/lib
-              mount /var/lib
+      cpuCount: "4"
+      memorySize: "8"
+      diskBus: virtio
+      imageName: "harvester-public/sle-micro-62"
+      networkName: "harvester-public/management"
+      disks:
+        - size: 60
+          autoDelete: true
+      userData: |
+        #cloud-config
+        runcmd:
+          - |
+            mkfs.xfs /dev/vdb
+            UUID=$(blkid -s UUID -o value /dev/vdb)
+            echo "UUID=${UUID} /var/lib xfs defaults,noatime 0 2" >> /etc/fstab
+            mkdir -p /var/lib
+            mount /var/lib
+---
+# 3. La Définition du Cluster RKE2 Standard
+apiVersion: provisioning.cattle.io/v1
+kind: Cluster
+metadata:
+  name: rke2-downstream-harvester
+  namespace: fleet-default
+spec:
+  kubernetesVersion: v1.31.1+rke2r1
+  cloudCredentialSecretName: fleet-default/harvester-creds
+
+  rke2Config:
+    chartValues:
+      rke2-cilium:
+        k8sServiceHost: "127.0.0.1"
+        k8sServicePort: 6443
+
+  controlPlaneNodesConfig:
+    controlPlaneConfig:
+      count: 3
+      machineTemplateRef:
+        apiVersion: rke-node.cattle.io/v1
+        kind: HarvesterMachineTemplate
+        name: rke2-sle-micro-template
