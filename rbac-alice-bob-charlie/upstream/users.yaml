@@ -35,22 +35,6 @@ type: Opaque
 stringData:
   password: "$2a$10$nCgoWdqJwQs9prt7X5a/2eWLn88I8pon6iNat90u4rq4mHqtoPGQy"
 
----
-# 4. Fleet Workspace RoleBinding (team-alpha)
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: alice-fleet-workspace-binding
-  namespace: team-alpha
-subjects:
-  - kind: User
-    name: u-alice
-    apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: ClusterRole
-  name: fleet-gitrepo-manager
-  apiGroup: rbac.authorization.k8s.io
-
 #---
 ################################################################################
 ## USER: Bob (Workspace: team-beta)
