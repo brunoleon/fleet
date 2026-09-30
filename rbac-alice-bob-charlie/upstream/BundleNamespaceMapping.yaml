@@ -1,0 +1,14 @@
+kind: BundleNamespaceMapping
+apiVersion: fleet.cattle.io/v1alpha1
+metadata:
+  name: team-alpha-mapping
+  namespace: team-alpha
+# Bundles to match by label. The labels are defined in fleet.yaml's labels
+# field or in the GitRepo metadata.labels field.
+bundleSelector:
+  matchLabels:
+    tenant: team-alpha
+# Namespaces containing clusters, matched by label.
+namespaceSelector:
+  matchLabels:
+    kubernetes.io/metadata.name: fleet-default
