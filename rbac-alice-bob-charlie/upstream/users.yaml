@@ -1,0 +1,158 @@
+---
+###############################################################################
+# USER: Alice (Workspace: team-alpha)
+###############################################################################
+apiVersion: management.cattle.io/v3
+# 1. User CR
+kind: User
+metadata:
+  name: u-alice
+enabled: true
+username: alice
+displayName: "Alice"
+password: "$2a$10$nCgoWdqJwQs9prt7X5a/2eWLn88I8pon6iNat90u4rq4mHqtoPGQy"
+principalIds:
+  - "local://u-alice"
+mustChangePassword: false
+
+---
+# 2. Global Role Binding (Standard User login)
+apiVersion: management.cattle.io/v3
+kind: GlobalRoleBinding
+metadata:
+  name: grb-alice-user
+globalRoleName: user
+userName: u-alice
+
+---
+# 3. Password Secret (read by Rancher's local auth provider)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: u-alice
+  namespace: cattle-local-user-passwords
+type: Opaque
+stringData:
+  password: "$2a$10$nCgoWdqJwQs9prt7X5a/2eWLn88I8pon6iNat90u4rq4mHqtoPGQy"
+
+---
+# 4. Fleet Workspace RoleBinding (team-alpha)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: alice-fleet-workspace-binding
+  namespace: team-alpha
+subjects:
+  - kind: User
+    name: u-alice
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: fleet-gitrepo-manager
+  apiGroup: rbac.authorization.k8s.io
+
+#---
+################################################################################
+## USER: Bob (Workspace: team-beta)
+################################################################################
+## 1. User CR
+#apiVersion: management.cattle.io/v3
+#kind: User
+#metadata:
+#  name: u-bob
+#enabled: true
+#username: bob
+#displayName: "Bob"
+#password: "$2a$10$nCgoWdqJwQs9prt7X5a/2eWLn88I8pon6iNat90u4rq4mHqtoPGQy"
+#principalIds:
+#  - "local://u-bob"
+#mustChangePassword: false
+#
+#---
+## 2. Global Role Binding (Standard User login)
+#apiVersion: management.cattle.io/v3
+#kind: GlobalRoleBinding
+#metadata:
+#  name: grb-bob-user
+#globalRoleName: user
+#userName: u-bob
+#
+#---
+## 3. Password Secret (read by Rancher's local auth provider)
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: u-bob
+#  namespace: cattle-local-user-passwords
+#type: Opaque
+#stringData:
+#  password: "$2a$10$nCgoWdqJwQs9prt7X5a/2eWLn88I8pon6iNat90u4rq4mHqtoPGQy"
+#
+#---
+## 4. Fleet Workspace RoleBinding (team-beta)
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: RoleBinding
+#metadata:
+#  name: bob-fleet-workspace-binding
+#  namespace: team-beta
+#subjects:
+#  - kind: User
+#    name: u-bob
+#    apiGroup: rbac.authorization.k8s.io
+#roleRef:
+#  kind: ClusterRole
+#  name: fleet-gitrepo-manager
+#  apiGroup: rbac.authorization.k8s.io
+#
+#---
+################################################################################
+## USER: Charlie (Workspace: team-charlie)
+################################################################################
+## 1. User CR
+#apiVersion: management.cattle.io/v3
+#kind: User
+#metadata:
+#  name: u-charlie
+#enabled: true
+#username: charlie
+#displayName: "Charlie"
+#password: "$2a$10$nCgoWdqJwQs9prt7X5a/2eWLn88I8pon6iNat90u4rq4mHqtoPGQy"
+#principalIds:
+#  - "local://u-charlie"
+#mustChangePassword: false
+#
+#---
+## 2. Global Role Binding (Standard User login)
+#apiVersion: management.cattle.io/v3
+#kind: GlobalRoleBinding
+#metadata:
+#  name: grb-charlie-user
+#globalRoleName: user
+#userName: u-charlie
+#
+#---
+## 3. Password Secret (read by Rancher's local auth provider)
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: u-charlie
+#  namespace: cattle-local-user-passwords
+#type: Opaque
+#stringData:
+#  password: "$2a$10$nCgoWdqJwQs9prt7X5a/2eWLn88I8pon6iNat90u4rq4mHqtoPGQy"
+#
+#---
+## 4. Fleet Workspace RoleBinding (team-charlie)
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: RoleBinding
+#metadata:
+#  name: charlie-fleet-workspace-binding
+#  namespace: team-charlie
+#subjects:
+#  - kind: User
+#    name: u-charlie
+#    apiGroup: rbac.authorization.k8s.io
+#roleRef:
+#  kind: ClusterRole
+#  name: fleet-gitrepo-manager
+#  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,108 @@
+---
+###############################################################################
+# TEAM ALPHA: Fleet Workspace & Tenant GlobalRole
+###############################################################################
+# 1. Fleet Workspace (creates the 'team-alpha' namespace in Rancher)
+apiVersion: management.cattle.io/v3
+kind: FleetWorkspace
+metadata:
+  name: team-alpha
+---
+# 2. Global Role for Team Alpha Tenant
+apiVersion: management.cattle.io/v3
+kind: GlobalRole
+metadata:
+  name: fleet-tenant-team-alpha
+namespacedRules:
+  team-alpha:
+    - apiGroups: ["fleet.cattle.io"]
+      resources: ["gitrepos", "helmops", "bundles"]
+      verbs: ["*"]
+    - apiGroups: ["fleet.cattle.io"]
+      resources: ["policies"]
+      verbs: ["get", "list", "watch"]
+rules:
+  - apiGroups: ["management.cattle.io"]
+    resources: ["fleetworkspaces"]
+    resourceNames: ["team-alpha"]
+    verbs: ["*"]
+---
+# 3. Global Role Binding for Team Alpha Tenant
+apiVersion: management.cattle.io/v3
+kind: GlobalRoleBinding
+metadata:
+  name: alice-fleet-workspace-binding
+globalRoleName: fleet-tenant-team-alpha
+userName: u-alice
+#---
+################################################################################
+## TEAM BETA: Fleet Workspace & Tenant GlobalRole
+################################################################################
+## 1. Fleet Workspace (creates the 'team-beta' namespace in Rancher)
+#apiVersion: management.cattle.io/v3
+#kind: FleetWorkspace
+#metadata:
+#  name: team-beta
+#---
+## 2. Global Role for Team Beta Tenant
+#apiVersion: management.cattle.io/v3
+#kind: GlobalRole
+#metadata:
+#  name: fleet-tenant-team-beta
+#namespacedRules:
+#  team-beta:
+#    - apiGroups: ["fleet.cattle.io"]
+#      resources: ["gitrepos", "helmops", "bundles"]
+#      verbs: ["*"]
+#    - apiGroups: ["fleet.cattle.io"]
+#      resources: ["policies"]
+#      verbs: ["get", "list", "watch"]
+#rules:
+#  - apiGroups: ["management.cattle.io"]
+#    resources: ["fleetworkspaces"]
+#    resourceNames: ["team-beta"]
+#    verbs: ["*"]
+#---
+## 3. Global Role Binding for Team Beta Tenant
+#apiVersion: management.cattle.io/v3
+#kind: GlobalRoleBinding
+#metadata:
+#  name: bob-fleet-workspace-binding
+#globalRoleName: fleet-tenant-team-beta
+#userName: u-bob
+#---
+################################################################################
+## TEAM CHARLIE: Fleet Workspace & Tenant GlobalRole
+################################################################################
+## 1. Fleet Workspace (creates the 'team-charlie' namespace in Rancher)
+#apiVersion: management.cattle.io/v3
+#kind: FleetWorkspace
+#metadata:
+#  name: team-charlie
+#---
+## 2. Global Role for Team Charlie Tenant
+#apiVersion: management.cattle.io/v3
+#kind: GlobalRole
+#metadata:
+#  name: fleet-tenant-team-charlie
+#namespacedRules:
+#  team-charlie:
+#    - apiGroups: ["fleet.cattle.io"]
+#      resources: ["gitrepos", "helmops", "bundles"]
+#      verbs: ["*"]
+#    - apiGroups: ["fleet.cattle.io"]
+#      resources: ["policies"]
+#      verbs: ["get", "list", "watch"]
+#rules:
+#  - apiGroups: ["management.cattle.io"]
+#    resources: ["fleetworkspaces"]
+#    resourceNames: ["team-charlie"]
+#    verbs: ["*"]
+#---
+## 3. Global Role Binding for Team Charlie Tenant
+#apiVersion: management.cattle.io/v3
+#kind: GlobalRoleBinding
+#metadata:
+#  name: charlie-fleet-workspace-binding
+#globalRoleName: fleet-tenant-team-charlie
+#userName: u-charlie
