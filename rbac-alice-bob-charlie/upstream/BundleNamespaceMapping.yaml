@@ -1,3 +1,13 @@
+# This manifest defines a BundleNamespaceMapping (fleet.cattle.io/v1alpha1), which serves as an administrative bridge in Fleet to enable cross-namespace cluster targeting.
+
+# Why It Is Needed
+# By default, Fleet enforces strict workspace isolation:
+
+# Workloads (GitRepo and the generated Bundle resources) defined in a workspace namespace can only deploy to clusters located in that same workspace namespace.
+# In Rancher, downstream clusters are typically registered in the fleet-default namespace.
+# Because Alice’s GitRepo lives in the team-alpha workspace namespace, Fleet would normally block her bundles from targeting clusters in fleet-default. Deployments would stay in a pending or unmatched state.
+# A BundleNamespaceMapping grants explicit permission for bundles originating in one namespace to discover and deploy onto clusters managed in another namespace.
+
 kind: BundleNamespaceMapping
 apiVersion: fleet.cattle.io/v1alpha1
 metadata:
@@ -5,10 +15,11 @@ metadata:
   namespace: team-alpha
 # Bundles to match by label. The labels are defined in fleet.yaml's labels
 # field or in the GitRepo metadata.labels field.
+# Defines which bundles originating from team-alpha this mapping applies to.
 bundleSelector:
-  matchLabels:
-    tenant: team-alpha
+  matchLabels: {}
 # Namespaces containing clusters, matched by label.
+# Selects the target Kubernetes namespace(s) where Fleet looks for registered Cluster resources.
 namespaceSelector:
   matchLabels:
     kubernetes.io/metadata.name: fleet-default
